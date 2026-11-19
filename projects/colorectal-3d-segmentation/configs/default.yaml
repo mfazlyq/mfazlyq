@@ -1,6 +1,6 @@
 data:
   manifest: data/manifest.json
-  root: .
+  root: data/Task10_Colon
   cache_rate: 0.25
   num_workers: 2
 
