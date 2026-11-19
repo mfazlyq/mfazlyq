@@ -43,6 +43,14 @@ A Streamlit research prototype that explores AI-assisted review of campus cybers
 
 ➡️ **[Explore NIST AI Audit Assistant](https://github.com/mfazlyq/audit-nist-ai)**
 
+### 🩻 3D Colorectal Tumor Segmentation — Research Starter
+
+A reproducible MONAI/PyTorch starter for NIfTI CT preprocessing, patient-level train/validation manifests, a 3D U-Net baseline, and Dice validation. This is the foundation for future CBAM-U²Net and hierarchical masking experiments.
+
+**Technologies:** Python · PyTorch · MONAI · NIfTI · 3D Segmentation
+
+➡️ **[Explore the research project](projects/colorectal-3d-segmentation/README.md)**
+
 ## Research and technical interests
 
 | Area | Topics |
