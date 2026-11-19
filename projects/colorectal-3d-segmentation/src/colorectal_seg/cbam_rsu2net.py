@@ -1,8 +1,9 @@
 """CBAM-RSU2Net 3D architecture ported from the supplied Colab notebook.
 
-This module preserves the notebook's layer topology and channel widths so an
-existing state_dict can be checked for compatibility. It is a research
-implementation, not a clinically validated model.
+This module preserves the notebook's layer topology and channel widths.
+The two-channel head matches the audited Task10_Colon binary masks. The
+three-channel form is retained only for historical checkpoint inspection.
+This is research software, not a clinically validated model.
 """
 from __future__ import annotations
 
@@ -141,7 +142,7 @@ class CBAM_RSU2Net(nn.Module):
 
 
 def build_cbam_rsu2net(in_channels: int = 1, num_classes: int = 2) -> CBAM_RSU2Net:
-    """Factory matching the notebook's default model configuration."""
+    """Build CBAM-RSU2Net; default to the audited binary Task10_Colon labels."""
     return CBAM_RSU2Net(in_ch=in_channels, out_ch=num_classes)
 
 
