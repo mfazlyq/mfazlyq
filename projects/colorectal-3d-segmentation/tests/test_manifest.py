@@ -24,7 +24,9 @@ class ManifestTests(unittest.TestCase):
             images.mkdir()
             labels.mkdir()
             (images / "case_001_0000.nii.gz").touch()
+            (images / "._case_001_0000.nii.gz").touch()
             (labels / "case_001.nii").touch()
+            (labels / "._case_001.nii").touch()
 
             pairs = pair_image_and_label_files(images, labels)
             self.assertEqual(len(pairs), 1)
