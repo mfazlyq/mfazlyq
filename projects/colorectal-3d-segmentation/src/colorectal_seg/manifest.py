@@ -44,7 +44,7 @@ def pair_image_and_label_files(
 
     image_files = sorted(
         p for p in images_path.iterdir()
-        if p.is_file() and p.name.lower().endswith(NIFTI_SUFFIXES)
+        if p.is_file() and not p.name.startswith("._") and p.name.lower().endswith(NIFTI_SUFFIXES)
     )
     label_files = sorted(
         p for p in labels_path.iterdir()
