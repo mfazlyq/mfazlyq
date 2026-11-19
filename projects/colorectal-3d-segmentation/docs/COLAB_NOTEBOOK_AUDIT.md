@@ -61,7 +61,7 @@ Consequently, the reported timing is not a benchmark of the exact same post-proc
 
 ### P1 — Training completion and checkpoint provenance are not included
 
-The saved output for the 100-epoch training cell ends in `KeyboardInterrupt` during epoch 1. Separate cells load `best_cbam_rsu2net.pth` and produce evaluation results, so the notebook does not establish that the displayed checkpoint was created by the interrupted training run. Keep the checkpoint's source run, epoch, validation metric, configuration, and code revision with the experiment record.
+The saved output for the 100-epoch training cell ends in `KeyboardInterrupt` during epoch 1. There is also a filename mismatch: the training cell saves to `best_cbam_rsu2net_improved.pth`, while the evaluation/loading cells read `best_cbam_rsu2net.pth`. The notebook therefore does not establish that the displayed checkpoint was created by the shown training run. Keep the checkpoint's source run, epoch, validation metric, configuration, and code revision with the experiment record.
 
 ### P1 — Data split and preprocessing should be made explicit
 
