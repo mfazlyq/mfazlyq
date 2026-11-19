@@ -28,6 +28,28 @@ The saved notebook outputs report 6,209,705 trainable parameters. The notebook r
 
 This verifies structural compatibility with the notebook's model definition, but it does **not** verify loading the original checkpoint: the `.pth` file was not included.
 
+## 2A. Ground-truth label audit result (author-run, 126 masks)
+
+The author ran `scripts/audit_label_values.py` against the Colab `labelsTr` directory. The reported scan completed successfully:
+
+- Masks scanned: **126**
+- Label value 0: **3,533,465,548 voxels**
+- Label value 1: **1,808,436 voxels**
+- Label value 2 or any other class: **not present in the reported scan**
+- Total voxels: **3,535,273,984**
+- Foreground (label 1) share: approximately **0.0511%** of all voxels.
+
+This confirms that the supplied ground-truth masks are **binary** (background = 0, foreground = 1), at least for the 126 files in this scan. The scan does not establish a separate bowel annotation.
+
+**Consequence:** With the current notebook training code (three output channels and no explicit target remapping), output channel 2 cannot receive positive bowel supervision from these masks. It must not be described or trusted as a learned bowel segmentation. The model's three-channel design and the bowel-probability-based hierarchical mask therefore require a methodological decision before reproduction.
+
+Possible paths, which should not be conflated:
+1. **Binary reproduction:** change the model head and all associated losses, inference, and metrics to two classes (background/tumor), then redesign hierarchical masking so it does not depend on a nonexistent bowel ground-truth class.
+2. **Three-class research model:** obtain or derive a scientifically defensible bowel annotation/target for every relevant case, document its provenance and label-generation protocol, and retrain/evaluate with that target. Do not fabricate bowel labels from the existing binary tumor masks.
+3. **Separate anatomical prior:** if bowel localization comes from an independently defined preprocessing/model/prior rather than the segmentation labels, implement it as a separate, documented input or post-processing source; do not interpret the unsupervised third output channel as that prior.
+
+The author-provided voxel counts are recorded as supplied; the mask files themselves were not uploaded, so this audit note does not independently reread the original NIfTI volumes.
+
 ## 3. Reproducibility and correctness issues to resolve
 
 ### P0 — Three output classes are not defined by the visible data pipeline
