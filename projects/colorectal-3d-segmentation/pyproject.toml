@@ -13,6 +13,7 @@ dependencies = [
   "monai==1.6.1",
   "nibabel>=5.3",
   "numpy>=1.26",
+  "scipy>=1.11",
   "PyYAML>=6.0",
 ]
 
