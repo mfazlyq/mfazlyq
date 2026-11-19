@@ -48,7 +48,7 @@ def pair_image_and_label_files(
     )
     label_files = sorted(
         p for p in labels_path.iterdir()
-        if p.is_file() and p.name.lower().endswith(NIFTI_SUFFIXES)
+        if p.is_file() and not p.name.startswith("._") and p.name.lower().endswith(NIFTI_SUFFIXES)
     )
 
     images_by_id = {case_id(p): p for p in image_files}
