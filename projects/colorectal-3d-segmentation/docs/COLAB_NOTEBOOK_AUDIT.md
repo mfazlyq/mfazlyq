@@ -24,23 +24,23 @@ The saved notebook outputs report 6,209,705 trainable parameters. The notebook r
 
 ## 2. Architecture port
 
-src/colorectal_seg/cbam_rsu2net.py ports the actual model topology from the notebook, retaining the layer names and stage/channel definitions used by its model code. A local CPU smoke test completed with input shape (1, 1, 16, 16, 16), output shape (1, 3, 16, 16, 16), and exactly 6,209,705 parameters.
+`src/colorectal_seg/cbam_rsu2net.py` ports the actual model topology from the notebook. A local comparison against the original model class in notebook cell 3 found all **297 state-dictionary key names and tensor shapes identical**. A local CPU smoke test also completed with input shape `(1, 1, 16, 16, 16)`, output shape `(1, 3, 16, 16, 16)`, and exactly 6,209,705 parameters.
 
-This smoke test verifies that the ported architecture executes and matches the notebook's reported parameter count. It does **not** verify checkpoint compatibility: the .pth checkpoint was not included, so a real load_state_dict comparison remains outstanding.
+This verifies structural compatibility with the notebook's model definition, but it does **not** verify loading the original checkpoint: the `.pth` file was not included.
 
 ## 3. Reproducibility and correctness issues to resolve
 
 ### P0 — Three output classes are not defined by the visible data pipeline
 
-The model is configured for three classes described in comments as background, tumor, and bowel. However, the data transforms only load, orient, resample, intensity-scale, crop, pad, and tensor-convert the label. The notebook contains no explicit label remapping step and no printed unique() audit of the masks.
+The model is configured for three classes described in comments as background, tumor, and bowel. However, the data transforms only load, orient, resample, intensity-scale, crop, pad, and tensor-convert the label. The notebook contains no explicit label remapping step and no printed `unique()` audit of the masks.
 
-Therefore, the source shown does not establish that class index 2 (bowel) is present in the training targets. If source masks contain only 0 and 1, the model's bowel output channel receives no positive supervision, and the subsequent bowel-probability mask is not validated. Before wiring this model into the training pipeline, record the unique label values and voxel counts for every source mask, then define and document the class mapping. Do not infer the mapping from the dataset folder name.
+Therefore, the source shown does not establish that class index 2 (bowel) is present in the training targets. If source masks contain only 0 and 1, the model's bowel output channel receives no positive supervision, and the subsequent bowel-probability mask is not validated. Before wiring this model into the training pipeline, run `scripts/audit_label_values.py` on the original labels and define/document the class mapping. Do not infer the mapping from the dataset folder name.
 
 ### P0 — Evaluation code uses incompatible prediction conventions
 
 The notebook uses more than one prediction convention:
-- A per-case evaluation cell thresholds sigmoid(logits) > 0.5 across all output channels.
-- Another evaluation cell uses argmax and one-hot conversion with to_onehot=2.
+- A per-case evaluation cell thresholds `sigmoid(logits) > 0.5` across all output channels.
+- Another evaluation cell uses `argmax` and one-hot conversion with `to_onehot=2`.
 - The hierarchical evaluation explicitly reads softmax channels 1 and 2 as tumor and bowel.
 
 These conventions are not interchangeable for mutually exclusive multiclass segmentation. The evaluation protocol must be made consistent with the verified class mapping (normally softmax + argmax for exclusive classes, or sigmoid + per-channel thresholds only for a genuinely multilabel target).
@@ -54,14 +54,14 @@ The 80.77% figure is calculated as the fraction of cases with Dice > 0; describe
 ### P1 — Hierarchical masking differs between evaluation, visualization, and timing cells
 
 - The principal evaluation uses 50%/30%/10% adaptive threshold fallback and largest-connected-component filtering.
-- The five-case visualization uses only a 50% maximum-confidence threshold and a different KeepLargestConnectedComponent setup.
+- The five-case visualization uses only a 50% maximum-confidence threshold and a different `KeepLargestConnectedComponent` setup.
 - The end-to-end timing cell uses a simple anatomical mask and 50% threshold, without the full fallback procedure or connected-component cleanup.
 
 Consequently, the reported timing is not a benchmark of the exact same post-processing routine used in the principal evaluation. The implementation should be centralized in one tested function and reused by evaluation, visualization, and timing.
 
 ### P1 — Training completion and checkpoint provenance are not included
 
-The saved output for the 100-epoch training cell ends in KeyboardInterrupt during epoch 1. Separate cells load best_cbam_rsu2net.pth and produce evaluation results, so the notebook does not establish that the displayed checkpoint was created by the interrupted training run. Keep the checkpoint's source run, epoch, validation metric, configuration, and code revision with the experiment record.
+The saved output for the 100-epoch training cell ends in `KeyboardInterrupt` during epoch 1. Separate cells load `best_cbam_rsu2net.pth` and produce evaluation results, so the notebook does not establish that the displayed checkpoint was created by the interrupted training run. Keep the checkpoint's source run, epoch, validation metric, configuration, and code revision with the experiment record.
 
 ### P1 — Data split and preprocessing should be made explicit
 
@@ -73,11 +73,11 @@ The timing cells use a synthetic 96³ input. The notebook separately shows valid
 
 ### P2 — Notebook outputs are not one clean execution record
 
-There are duplicate data-loading cells and repeated model definitions. At least one downstream cell reports that df_results is unavailable even though an earlier cell defines it, and the training output is interrupted while later result cells show completed evaluation. This suggests saved outputs came from different or partially reset runtime states. A clean, ordered run should be generated after the code is modularized.
+There are duplicate data-loading cells and repeated model definitions. At least one downstream cell reports that `df_results` is unavailable even though an earlier cell defines it, and the training output is interrupted while later result cells show completed evaluation. This suggests saved outputs came from different or partially reset runtime states. A clean, ordered run should be generated after the code is modularized.
 
 ## 4. Recommended implementation sequence
 
-1. Verify label values and establish the exact three-class mapping (or change the model to the true number of classes).
+1. Audit unique mask values and establish the exact mapping for background, tumor, and bowel (or change the model to the true number of classes).
 2. Load the supplied checkpoint against the ported architecture and confirm all keys and tensor shapes match.
 3. Centralize post-processing in a single function with explicit parameters and unit tests.
 4. Rebuild evaluation so each case's prediction, target, Dice, precision, recall, and detection status are computed from the same tensors; publish macro and micro aggregation definitions separately.
@@ -86,8 +86,8 @@ There are duplicate data-loading cells and repeated model definitions. At least 
 
 ## 5. What has and has not been reproduced
 
-**Completed in this repository:** exact model topology port; local CPU forward smoke test; parameter-count comparison.
+**Completed in this repository:** exact model topology port; all 297 state-dictionary key names and tensor shapes match the original notebook class; local CPU forward smoke test; parameter-count comparison.
 
-**Not yet verified:** three-class target semantics, .pth checkpoint compatibility, training reproduction, masked metrics, full-volume inference latency, and clinical validity.
+**Not yet verified:** actual `.pth` checkpoint loading, three-class target semantics, training reproduction, masked metrics, full-volume inference latency, and clinical validity.
 
 No patient image data or checkpoint is included. This project remains research software and is not intended for clinical diagnosis or treatment decisions.
