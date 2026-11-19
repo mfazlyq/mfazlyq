@@ -12,21 +12,26 @@ except ImportError:
 
 @unittest.skipIf(torch is None, "PyTorch is not installed in this lightweight test environment.")
 class TestCBAMRSU2Net(unittest.TestCase):
-    def test_forward_shape_and_parameter_count(self):
+    def setUp(self):
         torch.set_num_threads(2)
+
+    def test_binary_output_matches_audited_dataset(self):
+        model = CBAM_RSU2Net(in_ch=1, out_ch=2).eval()
+        with torch.no_grad():
+            output = model(torch.randn(1, 1, 16, 16, 16))
+        self.assertEqual(tuple(output.shape), (1, 2, 16, 16, 16))
+        self.assertEqual(sum(p.numel() for p in model.parameters()), 6_207_976)
+
+    def test_legacy_three_class_topology_parameter_count(self):
         model = CBAM_RSU2Net(in_ch=1, out_ch=3).eval()
         with torch.no_grad():
             output = model(torch.randn(1, 1, 16, 16, 16))
-
         self.assertEqual(tuple(output.shape), (1, 3, 16, 16, 16))
-        self.assertEqual(
-            sum(parameter.numel() for parameter in model.parameters()),
-            6_209_705,
-        )
+        self.assertEqual(sum(p.numel() for p in model.parameters()), 6_209_705)
 
-    def test_rejects_mismatched_class_count(self):
+    def test_rejects_unsupported_class_count(self):
         with self.assertRaises(ValueError):
-            CBAM_RSU2Net(in_ch=1, out_ch=2)
+            CBAM_RSU2Net(in_ch=1, out_ch=4)
 
 
 if __name__ == "__main__":
