@@ -16,10 +16,10 @@ Research direction: **Adaptive Hierarchical Masking Approach in a CBAM-U²Net Ar
 | Component | Status |
 |---|---|
 | MONAI 3D U-Net binary baseline | Starter trainer available |
-| CBAM-RSU2Net 3D architecture from author's Colab notebook | Ported to `src/colorectal_seg/cbam_rsu2net.py`; local forward and parameter-count smoke tests pass |
+| CBAM-RSU2Net 3D architecture from author's Colab notebook | Ported; structural key/shape comparison and local forward smoke tests pass |
 | Three-class label mapping (background / tumor / bowel) | **Needs verification against source masks** |
 | Hierarchical Anatomical Masking | Described and audited; canonical reusable implementation pending verification |
-| Original `.pth` checkpoint compatibility | Not yet checked; checkpoint was not included |
+| Original `.pth` checkpoint loading | Not yet checked; checkpoint was not included |
 | Full-volume benchmark and metric reproduction | Not yet independently reproduced |
 
 The CBAM-RSU2Net port preserves the notebook's stage/channel topology and reports the same **6,209,705 parameters** in a local smoke test. It is not yet wired into the trainer: the notebook does not show an explicit mapping step that establishes how class index 2 (bowel) is represented in the ground-truth masks.
@@ -34,6 +34,7 @@ colorectal-3d-segmentation/
 │   ├── COLAB_NOTEBOOK_AUDIT.md
 │   └── RESEARCH_PROTOCOL.md
 ├── scripts/
+│   ├── audit_label_values.py
 │   └── create_manifest.py
 ├── src/
 │   └── colorectal_seg/
@@ -91,6 +92,16 @@ pip install -r requirements.txt
 pip install -e .
 ~~~
 
+## Audit the segmentation labels first
+
+Run this against the local/Colab labels directory before attempting a three-class training run:
+
+~~~bash
+python scripts/audit_label_values.py --labels-dir data/Task10_Colon/labelsTr --output-csv outputs/label_value_audit.csv
+~~~
+
+The script reports the distinct values and voxel counts in each mask. Keep the CSV local; do not commit patient data or sensitive metadata.
+
 ## Prepare the baseline manifest
 
 ~~~bash
@@ -117,7 +128,7 @@ The manifest tests use the Python standard library. The CBAM-RSU2Net smoke tests
 
 ## Notebook findings and reproduction
 
-See [Colab Notebook Audit](docs/COLAB_NOTEBOOK_AUDIT.md) for the extracted preprocessing/training settings, architecture port status, reported notebook metrics, and issues that must be resolved before reproducing results.
+See [Colab Notebook Audit](docs/COLAB_NOTEBOOK_AUDIT.md) for extracted preprocessing/training settings, architecture port status, reported notebook metrics, and issues that must be resolved before reproducing results.
 
 Key items to verify before the proposed method is treated as reproducible:
 1. Unique label values and the exact mapping for background, tumor, and bowel.
