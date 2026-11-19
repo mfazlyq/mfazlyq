@@ -7,12 +7,14 @@ from typing import Any
 from monai.data import CacheDataset, DataLoader, list_data_collate
 from monai.transforms import (
     Compose,
+    CropForegroundd,
     EnsureChannelFirstd,
     EnsureTyped,
     LoadImaged,
     Orientationd,
     RandCropByPosNegLabeld,
     ScaleIntensityRanged,
+    SpatialPadd,
     Spacingd,
 )
 
@@ -44,7 +46,15 @@ def build_transforms(config: dict[str, Any], training: bool) -> Compose:
             b_max=1.0,
             clip=True,
         ),
+    ]
+
+    if bool(preprocessing.get("crop_foreground", True)):
+        transforms.append(CropForegroundd(keys=keys, source_key="image"))
+
+    transforms.extend([
+        SpatialPadd(keys=keys, spatial_size=spatial_size, mode="constant"),
         EnsureTyped(keys=keys, track_meta=True),
+    ])
     ]
 
     if training:
