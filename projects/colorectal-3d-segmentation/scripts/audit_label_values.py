@@ -16,15 +16,25 @@ import numpy as np
 
 
 def find_masks(directory: Path) -> list[Path]:
+    """Find real NIfTI masks, excluding macOS AppleDouble sidecar files."""
     files = list(directory.glob("*.nii")) + list(directory.glob("*.nii.gz"))
-    return sorted(set(files))
+    # macOS may create files such as ._colon_001.nii.gz. They contain
+    # Finder/resource-fork metadata, not NIfTI image data.
+    return sorted({path for path in files if not path.name.startswith("._")})
 
 
 def inspect_masks(directory: Path) -> list[dict[str, object]]:
     if not directory.is_dir():
         raise NotADirectoryError(f"Label directory does not exist: {directory}")
 
+    candidates = list(directory.glob("*.nii")) + list(directory.glob("*.nii.gz"))
+    skipped_appledouble = [path for path in candidates if path.name.startswith("._")]
     mask_files = find_masks(directory)
+    if skipped_appledouble:
+        print(
+            f"Skipping {len(skipped_appledouble)} macOS AppleDouble metadata file(s), "
+            "for example: " + skipped_appledouble[0].name
+        )
     if not mask_files:
         raise FileNotFoundError(f"No .nii or .nii.gz masks found in: {directory}")
 
