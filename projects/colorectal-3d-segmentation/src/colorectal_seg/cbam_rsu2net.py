@@ -106,19 +106,20 @@ class RSU4_CBAM3D(nn.Module):
 
 
 class CBAM_RSU2Net(nn.Module):
-    """Notebook's 3D CBAM-RSU2Net, configured for three output channels.
+    """3D CBAM-RSU2Net with a binary head by default.
 
-    The notebook calls the channels background, tumor, and bowel. The source
-    label mapping for all three classes is not defined there and must be
-    verified before trusting bowel probability or using this model for training.
+    Two output channels match the audited Task10_Colon label values (0=background,
+    1=tumor). The legacy 3-channel head is available only to inspect historical
+    checkpoints; its third channel is not supervised by the supplied masks and
+    must never be interpreted as a learned bowel segmentation.
     """
 
-    def __init__(self, in_ch: int = 1, out_ch: int = 3) -> None:
+    def __init__(self, in_ch: int = 1, out_ch: int = 2) -> None:
         super().__init__()
         if in_ch != 1:
             raise ValueError("The supplied notebook uses a single-channel CT input.")
-        if out_ch != 3:
-            raise ValueError("The supplied notebook architecture is configured for 3 classes.")
+        if out_ch not in (2, 3):
+            raise ValueError("out_ch must be 2 (binary Task10_Colon) or 3 (legacy notebook inspection).")
         self.stage1 = RSU4_CBAM3D(in_ch, 16, 64)
         self.pool12 = nn.MaxPool3d(2, stride=2, ceil_mode=True)
         self.stage2 = RSU4_CBAM3D(64, 32, 128)
@@ -139,7 +140,7 @@ class CBAM_RSU2Net(nn.Module):
         return self.outconv(dec1)
 
 
-def build_cbam_rsu2net(in_channels: int = 1, num_classes: int = 3) -> CBAM_RSU2Net:
+def build_cbam_rsu2net(in_channels: int = 1, num_classes: int = 2) -> CBAM_RSU2Net:
     """Factory matching the notebook's default model configuration."""
     return CBAM_RSU2Net(in_ch=in_channels, out_ch=num_classes)
 
