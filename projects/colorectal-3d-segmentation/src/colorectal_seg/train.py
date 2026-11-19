@@ -20,6 +20,7 @@ from monai.transforms import AsDiscrete
 from colorectal_seg.data import build_dataloaders
 from colorectal_seg.manifest import load_manifest
 from colorectal_seg.models import build_model
+from colorectal_seg.masking import apply_hierarchical_anatomical_masking
 
 
 def set_seed(seed: int) -> None:
@@ -84,8 +85,16 @@ def evaluate(
     patch_size: tuple[int, int, int],
     overlap: float,
     num_classes: int,
+    use_colon_prior: bool = False,
+    prior_margin_mm: float = 0.0,
+    spacing_mm: tuple[float, float, float] = (1.0, 1.0, 1.0),
 ) -> float:
-    """Compute mean foreground Dice using full-volume sliding-window inference."""
+    """Compute mean foreground Dice on full volumes.
+
+    When enabled, each tumor prediction is constrained by an independently
+    generated colon prior. The prior is never inferred from the unsupervised
+    third channel of the legacy notebook model.
+    """
     inferer = SlidingWindowInferer(
         roi_size=patch_size,
         sw_batch_size=1,
@@ -101,9 +110,41 @@ def evaluate(
             images = batch["image"].to(device)
             labels = batch["label"].to(device)
             logits = inferer(images, model)
-            predictions = [post_prediction(item) for item in decollate_batch(logits)]
-            targets = [post_label(item) for item in decollate_batch(labels)]
-            metric(y_pred=predictions, y=targets)
+
+            if use_colon_prior:
+                if "colon_prior" not in batch:
+                    raise RuntimeError(
+                        "Anatomical-prior evaluation requested, but batch has no 'colon_prior'. "
+                        "Generate and attach TotalSegmentator priors before evaluation."
+                    )
+                probabilities = torch.softmax(logits, dim=1)
+                prior_batch = batch["colon_prior"]
+                predictions = []
+                targets = []
+                for index in range(images.shape[0]):
+                    prediction_np, _details = apply_hierarchical_anatomical_masking(
+                        probabilities[index, 1].detach().cpu().numpy(),
+                        prior_batch[index, 0].detach().cpu().numpy(),
+                        prior_margin_mm=prior_margin_mm,
+                        spacing_mm=spacing_mm,
+                    )
+                    prediction_index = torch.as_tensor(
+                        prediction_np.astype(np.int64), device=device
+                    )
+                    target_index = labels[index, 0].long()
+                    prediction_onehot = torch.nn.functional.one_hot(
+                        prediction_index, num_classes=num_classes
+                    ).movedim(-1, 0).float()
+                    target_onehot = torch.nn.functional.one_hot(
+                        target_index, num_classes=num_classes
+                    ).movedim(-1, 0).float()
+                    predictions.append(prediction_onehot)
+                    targets.append(target_onehot)
+                metric(y_pred=predictions, y=targets)
+            else:
+                predictions = [post_prediction(item) for item in decollate_batch(logits)]
+                targets = [post_label(item) for item in decollate_batch(labels)]
+                metric(y_pred=predictions, y=targets)
 
     result = float(metric.aggregate().item())
     metric.reset()
@@ -174,6 +215,11 @@ def train(config: dict[str, Any]) -> Path:
                     patch_size=patch_size,
                     overlap=float(config["training"]["sliding_window_overlap"]),
                     num_classes=num_classes,
+                    use_colon_prior=bool(config["data"].get("use_colon_prior", False)),
+                    prior_margin_mm=float(config["preprocessing"].get("colon_prior_margin_mm", 0.0)),
+                    spacing_mm=tuple(
+                        float(v) for v in config["preprocessing"]["target_spacing"]
+                    ),
                 )
                 if validation_dice > best_dice:
                     best_dice = validation_dice
