@@ -3,9 +3,13 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import sys
 
 import nibabel as nib
 import numpy as np
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from generate_colon_priors import list_ct_volumes
 from colorectal_seg.manifest import case_id
