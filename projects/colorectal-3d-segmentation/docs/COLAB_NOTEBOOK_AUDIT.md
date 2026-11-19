@@ -50,6 +50,22 @@ Possible paths, which should not be conflated:
 
 The author-provided voxel counts are recorded as supplied; the mask files themselves were not uploaded, so this audit note does not independently reread the original NIfTI volumes.
 
+## 2B. Selected implementation direction: external colon prior
+
+The implementation direction selected after review is a **binary CBAM-RSU2Net plus a separate external colon anatomical prior**. The network's output is background/tumor only. The external colon mask is generated from the CT by a separate anatomical model and is used only in hierarchical post-processing.
+
+The current candidate is TotalSegmentator, whose default CT task includes a class named colon. Upstream supports class-only inference with the --roi_subset colon argument. Its documentation warns that colon and small_bowel may be confused; therefore this output is only a candidate prior and requires visual and tumor-coverage QC on Task10_Colon before masking predictions.
+
+The revised project adds:
+- A two-output CBAM-RSU2Net head (the three-output head is retained only for old model inspection).
+- A prior-generation script using TotalSegmentator.
+- Checks for missing/empty prior files and CT/prior geometry mismatch.
+- A tumor-label coverage audit to detect when the prior would exclude annotated tumor voxels.
+- A prior-aware manifest and MONAI transform path that applies the same orientation/resampling to image, tumor label, and colon prior.
+- An adaptive masking function that retains the notebook's 50%/30%/10% threshold sequence and largest-component cleanup, but uses the independent colon prior instead of the unsupervised output channel 2.
+
+A strict 0 mm prior margin is the default. Candidate margins (e.g. 0, 5, 10 mm) must be selected on the validation split with a documented ablation; no margin is assumed to be optimal. The two-output model requires training/fine-tuning with binary labels. The old three-output checkpoint cannot be strictly loaded into the new two-output head.
+
 ## 3. Reproducibility and correctness issues to resolve
 
 ### P0 — Three output classes are not defined by the visible data pipeline
