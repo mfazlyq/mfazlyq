@@ -1,0 +1,34 @@
+data:
+  manifest: data/cbam_rsu2net_binary_manifest.json
+  root: data/Task10_Colon
+  use_colon_prior: true
+  cache_rate: 0.25
+  num_workers: 2
+
+preprocessing:
+  target_spacing: [1.0, 1.0, 1.0]
+  ct_window:
+    min: -200
+    max: 200
+  orientation: RAS
+  colon_prior_margin_mm: 0.0
+
+model:
+  name: cbam_rsu2net
+  in_channels: 1
+  num_classes: 2
+
+training:
+  seed: 42
+  epochs: 100
+  batch_size: 1
+  learning_rate: 0.0001
+  weight_decay: 0.00001
+  scheduler: cosine
+  amp: true
+  patch_size: [96, 96, 96]
+  samples_per_volume: 4
+  validation_interval: 2
+  sliding_window_overlap: 0.25
+  output_dir: outputs/cbam_rsu2net_binary_ham
+  device: auto
