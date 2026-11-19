@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+  <title id="title">M. Fazly Qusyairy — AI Research and Software Engineering</title>
+  <desc id="desc">Dark navy abstract technology banner with cyan network nodes and geometric lines.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#071629"/>
+      <stop offset="55%" stop-color="#0A2340"/>
+      <stop offset="100%" stop-color="#102D4D"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.75"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="300" rx="22" fill="url(#bg)"/>
+  <g fill="none" stroke="url(#glow)" stroke-width="1.4" opacity="0.9">
+    <path d="M690 42 L830 112 L980 48 L1125 115 L1030 238 L875 202 L760 262 L690 42"/>
+    <path d="M830 112 L875 202 L1030 238 M980 48 L1030 238 M1125 115 L875 202"/>
+    <path d="M760 262 L875 202 L830 112 L690 42"/>
+    <path d="M980 48 L1125 115 L1180 42 M1030 238 L1170 268"/>
+  </g>
+  <g fill="#67E8F9">
+    <circle cx="690" cy="42" r="5"/><circle cx="830" cy="112" r="7"/>
+    <circle cx="980" cy="48" r="5"/><circle cx="1125" cy="115" r="7"/>
+    <circle cx="1030" cy="238" r="5"/><circle cx="875" cy="202" r="8"/>
+    <circle cx="760" cy="262" r="5"/><circle cx="1180" cy="42" r="4"/>
+    <circle cx="1170" cy="268" r="4"/>
+  </g>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="72" y="112" fill="#E0F2FE" font-size="20" letter-spacing="5">AI RESEARCH · DEEP LEARNING · SOFTWARE</text>
+    <text x="68" y="178" fill="#FFFFFF" font-size="48" font-weight="700">M. Fazly Qusyairy</text>
+    <text x="72" y="220" fill="#67E8F9" font-size="21">Building intelligent systems with research and engineering</text>
+  </g>
+  <path d="M72 248 H510" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" opacity="0.75"/>
+</svg>
