@@ -55,7 +55,6 @@ def build_transforms(config: dict[str, Any], training: bool) -> Compose:
         SpatialPadd(keys=keys, spatial_size=spatial_size, mode="constant"),
         EnsureTyped(keys=keys, track_meta=True),
     ])
-    ]
 
     if training:
         transforms.append(
