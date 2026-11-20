@@ -139,6 +139,21 @@ python scripts/create_manifest.py \
 
 The manifest associates image, tumor label, and colon prior using the same case ID. Each prior is transformed with the CT and label: orientation is aligned, the image is resampled linearly, and labels/priors use nearest-neighbor interpolation. The validation loader keeps the full volume for sliding-window inference.
 
+## Visual quality control
+
+Create side-by-side axial overlays for the tumor ground truth and the original, 5 mm, and 10 mm colon priors. The script chooses the axial slice with the largest number of tumor voxels for each requested case:
+
+~~~bash
+python scripts/preview_prior_overlays.py \\
+  --images-dir data/Task10_Colon/imagesTr \\
+  --labels-dir data/Task10_Colon/labelsTr \\
+  --priors-dir data/Task10_Colon/colon_priors \\
+  --output-dir outputs/prior_visual_qc \\
+  --cases colon_001 colon_005 colon_006
+~~~
+
+Red contours show the annotated tumor; cyan contours show the colon prior at the specified margin. Review the entire tumor region in all three dimensions, not only this representative axial slice. The PNGs are a screening aid and not a substitute for volumetric review.
+
 ## Train and evaluate
 
 Use configs/cbam_rsu2net_binary.yaml. The network predicts two classes; the independent prior is only used by validation/inference post-processing. The hierarchical masking implementation retains the notebook's 50%, 30%, 10% relative-maximum threshold fallback and largest-component cleanup, but intersects candidates with the external colon prior rather than the unsupervised third network channel.
