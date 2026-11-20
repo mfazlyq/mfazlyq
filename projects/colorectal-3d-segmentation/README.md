@@ -150,7 +150,11 @@ python scripts/preview_prior_overlays.py --images-dir data/sample/imagesTr --lab
 
 For this portfolio prototype, prior generation, geometry checks, coverage comparison, and representative-slice visual review are limited to these three samples. The 5 mm margin is the selected demonstration setting; it is not presented as an optimal value for the full dataset. See [Pilot Validation Report](docs/SAMPLE_PRIOR_QC_RESULTS.md) for the measured results.
 
-6. Create a reproducible manifest with all three sources:
+### Optional next phase: end-to-end model experiment
+
+The following commands are provided for a later full-data training experiment. They were **not run as part of the three-case pilot** and are not required to reproduce the sample prior comparison above.
+
+6. Create a prior-aware manifest after preparing the complete experiment dataset and its train/validation split:
 
 ~~~bash
 python scripts/create_manifest.py --data-root data/Task10_Colon --images-dir imagesTr --labels-dir labelsTr --colon-priors-dir colon_priors --output data/cbam_rsu2net_binary_manifest.json --validation-fraction 0.2 --seed 42
@@ -162,7 +166,7 @@ python scripts/create_manifest.py --data-root data/Task10_Colon --images-dir ima
 python -m colorectal_seg.train --config configs/cbam_rsu2net_binary.yaml
 ~~~
 
-See [Anatomical Prior Protocol](docs/ANATOMICAL_PRIOR_PROTOCOL.md) for the complete method, validation requirements, margin ablation, and checkpoint implications.
+See [Anatomical Prior Protocol](docs/ANATOMICAL_PRIOR_PROTOCOL.md) for the method, future ablation requirements, and checkpoint implications.
 
 ## Tests
 
