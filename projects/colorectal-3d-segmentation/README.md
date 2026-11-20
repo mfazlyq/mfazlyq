@@ -24,7 +24,7 @@ The third output channel in the original Colab notebook was not supervised as bo
 
 The candidate external prior generator is TotalSegmentator, whose default CT task includes a colon class. Its upstream documentation warns that colon and small bowel may sometimes be confused. Consequently, generated colon masks are predictions, not ground truth, and must pass spatial checks, tumor-coverage analysis, and visual review before they are used to constrain tumor predictions.
 
-Read [Anatomical Prior Protocol](docs/ANATOMICAL_PRIOR_PROTOCOL.md) before generating priors or training the prior-aware model.
+On the three sample cases, the author measured macro mean tumor coverage of 83.5954% (0 mm), 98.4212% (5 mm), and 99.9162% (10 mm). The 5 mm setting is only a candidate for validation: the prior volume expands as the margin grows, and these three cases are not enough to select a final margin. See [Anatomical Prior Protocol](docs/ANATOMICAL_PRIOR_PROTOCOL.md) for per-case results and the validation plan.
 
 ## Implementation status
 
@@ -32,9 +32,9 @@ Read [Anatomical Prior Protocol](docs/ANATOMICAL_PRIOR_PROTOCOL.md) before gener
 |---|---|
 | MONAI 3D U-Net binary baseline | Starter trainer available |
 | CBAM-RSU2Net architecture | Ported from Colab; two-class head added for the audited labels |
-| External colon prior generator | TotalSegmentator wrapper added; not yet run on the author's dataset |
-| Prior geometry/completeness audit | Added; requires generated priors |
-| Tumor coverage by colon prior | Audit script added; requires generated priors |
+| External colon prior generator | Successfully run by the author on 3 sample CT volumes |
+| Prior geometry/completeness audit | Passed for the 3 sample CT volumes |
+| Tumor coverage by colon prior | 0/5/10 mm comparison completed on 3 cases; validation on the full cohort remains pending |
 | Hierarchical masking | Reuses 50/30/10 adaptive threshold and largest-component cleanup with independent prior |
 | Real-data reproduction and metrics | Not yet run or independently reproduced |
 
@@ -136,10 +136,10 @@ python scripts/audit_colon_priors.py --images-dir data/Task10_Colon/imagesTr --p
 4. Check how much of each tumor ground-truth mask is covered by the generated colon prior:
 
 ~~~bash
-python scripts/audit_prior_vs_tumor_labels.py --images-dir data/Task10_Colon/imagesTr --labels-dir data/Task10_Colon/labelsTr --priors-dir data/Task10_Colon/colon_priors
+python scripts/audit_prior_vs_tumor_labels.py --images-dir data/Task10_Colon/imagesTr --labels-dir data/Task10_Colon/labelsTr --priors-dir data/Task10_Colon/colon_priors --margins-mm 0 5 10
 ~~~
 
-5. Inspect representative overlays and low-coverage cases. Do not use the prior as a hard constraint until the anatomical segmentations have been visually reviewed.
+5. Inspect representative overlays and low-coverage cases. The preliminary 3-case test suggests 5 mm is a candidate to validate, not a final setting. Do not use the prior as a hard constraint until the anatomical segmentations have been visually reviewed and coverage has been measured on all cases.
 
 6. Create a reproducible manifest with all three sources:
 
