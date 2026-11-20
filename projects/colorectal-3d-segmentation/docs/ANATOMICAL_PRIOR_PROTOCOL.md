@@ -22,6 +22,32 @@ The upstream documentation notes that colon and small_bowel are sometimes mixed 
 
 The default total CT task is documented as Apache-2.0. Check the current upstream license and task notes before redistributing model weights or using a different TotalSegmentator subtask.
 
+## Preliminary three-case coverage result
+
+The author generated external colon masks for three sample CT volumes and ran the tumor-label coverage audit. At the original 0 mm margin:
+
+| Case | Tumor voxels | Tumor voxels inside prior | Coverage |
+|---|---:|---:|---:|
+| colon_001 | 1,783 | 1,464 | 82.1088% |
+| colon_005 | 15,212 | 11,046 | 72.6137% |
+| colon_006 | 1,194 | 1,147 | 96.0637% |
+
+The macro mean (equal weight per case) is **83.5954%**. The pooled voxel coverage (all tumor voxels combined) is **75.0838%**. The lowest-coverage case, colon_005, has **27.3863%** of annotated tumor voxels outside the prior.
+
+This is a preliminary three-case sample only. It is not an estimate of performance across all 126 cases. It is already sufficient to show that an unexpanded prior must **not** be applied as an unexamined hard constraint: it would exclude a substantial fraction of tumor ground-truth voxels in these samples.
+
+The coverage audit script now compares the prior at multiple physical margins (default 0, 5, and 10 mm):
+
+~~~bash
+python scripts/audit_prior_vs_tumor_labels.py \
+  --images-dir data/Task10_Colon/imagesTr \
+  --labels-dir data/Task10_Colon/labelsTr \
+  --priors-dir data/Task10_Colon/colon_priors \
+  --margins-mm 0 5 10
+~~~
+
+The test should show whether dilation improves coverage, but **higher coverage alone does not prove the anatomical prior is correct**. Larger margins also make the prior less selective. Inspect the overlays, record the prior volume/occupancy, and compare masked versus unmasked tumor metrics using a fixed validation split. Select margin settings on validation data only, then report them unchanged on a held-out test set.
+
 ## Generate prior masks
 
 Install TotalSegmentator in the same Colab environment as the dataset:
