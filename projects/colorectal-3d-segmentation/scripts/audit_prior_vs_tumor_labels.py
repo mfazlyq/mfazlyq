@@ -56,6 +56,7 @@ def main() -> None:
     pooled_covered: dict[float, int] = {m: 0 for m in args.margins_mm}
     missing: list[str] = []
     empty_gt: list[str] = []
+    cases_with_tumor_gt = 0
 
     for identifier in sorted(images):
         prior_path = args.priors_dir / identifier / "colon.nii.gz"
@@ -79,6 +80,8 @@ def main() -> None:
             empty_gt.append(identifier)
             continue
 
+        cases_with_tumor_gt += 1
+
         # NIfTI voxel sizes correspond to the three spatial array axes.
         spacing_mm = tuple(float(v) for v in image.header.get_zooms()[:3])
         distance_mm = ndimage.distance_transform_edt(~colon, sampling=spacing_mm)
@@ -98,7 +101,7 @@ def main() -> None:
             )
 
     print("\nSummary")
-    print(f"Cases with tumor GT: {sum(bool(v) for v in per_margin.values()) if per_margin else 0}")
+    print(f"Cases with tumor GT: {cases_with_tumor_gt}")
     print(f"Missing priors: {len(missing)} {missing[:10]}")
     print(f"Cases with empty tumor GT: {len(empty_gt)} {empty_gt[:10]}")
     for margin in args.margins_mm:
