@@ -1,4 +1,4 @@
-name: 3D segmentation starter tests
+name: 3D segmentation tests
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  manifest-tests:
+  unit-tests:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -24,7 +24,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Run dependency-free dataset manifest tests
+      - name: Install lightweight test dependencies
+        run: python -m pip install numpy scipy
+      - name: Run unit tests
         env:
           PYTHONPATH: src
         run: python -m unittest discover -s tests -v

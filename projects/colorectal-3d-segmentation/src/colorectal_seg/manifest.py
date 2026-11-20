@@ -26,12 +26,14 @@ def case_id(path: Path) -> str:
 def pair_image_and_label_files(
     images_dir: str | Path,
     labels_dir: str | Path,
+    colon_priors_dir: str | Path | None = None,
 ) -> list[dict[str, str]]:
     """Pair images and labels by case ID and return paths relative to data root.
 
     The images directory may contain single-channel names such as
     case_001_0000.nii.gz. Label files are expected to use case_001.nii.gz
-    or case_001.nii.
+    or case_001.nii. When colon_priors_dir is provided, each case must have
+    a prior at <colon_priors_dir>/<case_id>/colon.nii.gz.
     """
     images_path = Path(images_dir).expanduser().resolve()
     labels_path = Path(labels_dir).expanduser().resolve()
@@ -42,11 +44,11 @@ def pair_image_and_label_files(
 
     image_files = sorted(
         p for p in images_path.iterdir()
-        if p.is_file() and p.name.lower().endswith(NIFTI_SUFFIXES)
+        if p.is_file() and not p.name.startswith("._") and p.name.lower().endswith(NIFTI_SUFFIXES)
     )
     label_files = sorted(
         p for p in labels_path.iterdir()
-        if p.is_file() and p.name.lower().endswith(NIFTI_SUFFIXES)
+        if p.is_file() and not p.name.startswith("._") and p.name.lower().endswith(NIFTI_SUFFIXES)
     )
 
     images_by_id = {case_id(p): p for p in image_files}
@@ -71,15 +73,39 @@ def pair_image_and_label_files(
         raise ValueError("No .nii or .nii.gz image/label pairs were found.")
 
     common_root = images_path.parent
+    colon_root = None
+    if colon_priors_dir is not None:
+        candidate_root = Path(colon_priors_dir).expanduser()
+        colon_root = candidate_root.resolve() if candidate_root.is_absolute() else (common_root / candidate_root).resolve()
+        if not colon_root.is_dir():
+            raise FileNotFoundError(f"Colon-prior directory does not exist: {colon_root}")
+
     pairs = []
+    missing_priors = []
     for identifier in sorted(images_by_id):
         image = images_by_id[identifier]
         label = labels_by_id[identifier]
-        pairs.append({
+        record = {
             "case_id": identifier,
             "image": image.relative_to(common_root).as_posix(),
             "label": label.relative_to(common_root).as_posix(),
-        })
+        }
+        if colon_root is not None:
+            prior = colon_root / identifier / "colon.nii.gz"
+            if not prior.is_file():
+                missing_priors.append(str(prior))
+            else:
+                try:
+                    record["colon_prior"] = prior.relative_to(common_root).as_posix()
+                except ValueError as exc:
+                    raise ValueError("Colon-prior directory must be inside the dataset root.") from exc
+        pairs.append(record)
+
+    if missing_priors:
+        raise ValueError(
+            "Colon priors are missing for one or more cases. Examples: "
+            + ", ".join(missing_priors[:5])
+        )
     return pairs
 
 
@@ -142,11 +168,18 @@ def load_manifest(
                 raise FileNotFoundError(f"Image file not found: {image_path}")
             if not label_path.is_file():
                 raise FileNotFoundError(f"Label file not found: {label_path}")
-            resolved_records.append({
+            resolved = {
                 **record,
                 "image": str(image_path.resolve()),
                 "label": str(label_path.resolve()),
-            })
+            }
+            if "colon_prior" in record:
+                prior = Path(record["colon_prior"])
+                prior_path = prior if prior.is_absolute() else root / prior
+                if not prior_path.is_file():
+                    raise FileNotFoundError(f"Colon prior file not found: {prior_path}")
+                resolved["colon_prior"] = str(prior_path.resolve())
+            resolved_records.append(resolved)
         result[split_name] = resolved_records
 
     train_ids = {record.get("case_id") for record in result["train"]}

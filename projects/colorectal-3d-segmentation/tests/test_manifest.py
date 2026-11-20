@@ -24,13 +24,35 @@ class ManifestTests(unittest.TestCase):
             images.mkdir()
             labels.mkdir()
             (images / "case_001_0000.nii.gz").touch()
+            (images / "._case_001_0000.nii.gz").touch()
             (labels / "case_001.nii").touch()
+            (labels / "._case_001.nii").touch()
 
             pairs = pair_image_and_label_files(images, labels)
             self.assertEqual(len(pairs), 1)
             self.assertEqual(pairs[0]["case_id"], "case_001")
             self.assertEqual(pairs[0]["image"], "imagesTr/case_001_0000.nii.gz")
             self.assertEqual(pairs[0]["label"], "labelsTr/case_001.nii")
+
+    def test_pairs_prior_and_ignores_macos_sidecars(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            images = root / "imagesTr"
+            labels = root / "labelsTr"
+            priors = root / "colon_priors"
+            images.mkdir()
+            labels.mkdir()
+            (images / "case_001_0000.nii.gz").touch()
+            (labels / "case_001.nii.gz").touch()
+            (images / "._case_001_0000.nii.gz").touch()
+            (labels / "._case_001.nii.gz").touch()
+            prior_case = priors / "case_001"
+            prior_case.mkdir(parents=True)
+            (prior_case / "colon.nii.gz").touch()
+
+            pairs = pair_image_and_label_files(images, labels, colon_priors_dir=priors)
+            self.assertEqual(len(pairs), 1)
+            self.assertEqual(pairs[0]["colon_prior"], "colon_priors/case_001/colon.nii.gz")
 
     def test_raises_for_missing_label(self):
         with tempfile.TemporaryDirectory() as temp_dir:

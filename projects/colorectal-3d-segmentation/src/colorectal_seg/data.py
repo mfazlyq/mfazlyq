@@ -7,12 +7,14 @@ from typing import Any
 from monai.data import CacheDataset, DataLoader, list_data_collate
 from monai.transforms import (
     Compose,
+    CropForegroundd,
     EnsureChannelFirstd,
     EnsureTyped,
     LoadImaged,
     Orientationd,
     RandCropByPosNegLabeld,
     ScaleIntensityRanged,
+    SpatialPadd,
     Spacingd,
 )
 
@@ -23,6 +25,9 @@ def build_transforms(config: dict[str, Any], training: bool) -> Compose:
     training_config = config["training"]
     spatial_size = tuple(int(v) for v in training_config["patch_size"])
     keys = ["image", "label"]
+    use_colon_prior = bool(config["data"].get("use_colon_prior", False))
+    if use_colon_prior:
+        keys.append("colon_prior")
 
     transforms = [
         LoadImaged(keys=keys),
@@ -31,7 +36,7 @@ def build_transforms(config: dict[str, Any], training: bool) -> Compose:
         Spacingd(
             keys=keys,
             pixdim=tuple(float(v) for v in preprocessing["target_spacing"]),
-            mode=("bilinear", "nearest"),
+            mode=("bilinear", "nearest", "nearest") if use_colon_prior else ("bilinear", "nearest"),
         ),
         ScaleIntensityRanged(
             keys=["image"],
@@ -41,8 +46,15 @@ def build_transforms(config: dict[str, Any], training: bool) -> Compose:
             b_max=1.0,
             clip=True,
         ),
-        EnsureTyped(keys=keys, track_meta=True),
     ]
+
+    if bool(preprocessing.get("crop_foreground", True)):
+        transforms.append(CropForegroundd(keys=keys, source_key="image"))
+
+    transforms.extend([
+        SpatialPadd(keys=keys, spatial_size=spatial_size, mode="constant"),
+        EnsureTyped(keys=keys, track_meta=True),
+    ])
 
     if training:
         transforms.append(
@@ -67,6 +79,13 @@ def build_dataloaders(
 ) -> tuple[DataLoader, DataLoader]:
     """Create cached MONAI loaders for training and full-volume validation."""
     data_config = config["data"]
+    if data_config.get("use_colon_prior", False):
+        for split_name in ("train", "validation"):
+            missing = [record.get("case_id", "<unknown>") for record in manifest[split_name] if "colon_prior" not in record]
+            if missing:
+                raise ValueError(
+                    f"Colon prior is enabled but missing from the {split_name} manifest records: {missing[:5]}"
+                )
     batch_size = int(config["training"]["batch_size"])
     workers = int(data_config.get("num_workers", 0))
     cache_rate = float(data_config.get("cache_rate", 0.0))

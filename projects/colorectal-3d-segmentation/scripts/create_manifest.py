@@ -20,10 +20,20 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("data/manifest.json"))
     parser.add_argument("--validation-fraction", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--colon-priors-dir",
+        type=Path,
+        default=None,
+        help="Optional directory with <case_id>/colon.nii.gz outputs from TotalSegmentator.",
+    )
     args = parser.parse_args()
 
     root = args.data_root.expanduser().resolve()
-    pairs = pair_image_and_label_files(root / args.images_dir, root / args.labels_dir)
+    pairs = pair_image_and_label_files(
+        root / args.images_dir,
+        root / args.labels_dir,
+        colon_priors_dir=args.colon_priors_dir,
+    )
     manifest = split_pairs(pairs, args.validation_fraction, args.seed)
     destination = write_manifest(manifest, args.output)
 

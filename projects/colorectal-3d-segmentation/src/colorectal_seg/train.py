@@ -20,6 +20,7 @@ from monai.transforms import AsDiscrete
 from colorectal_seg.data import build_dataloaders
 from colorectal_seg.manifest import load_manifest
 from colorectal_seg.models import build_model
+from colorectal_seg.masking import apply_hierarchical_anatomical_masking
 
 
 def set_seed(seed: int) -> None:
@@ -66,11 +67,19 @@ def validate_config(config: dict[str, Any]) -> None:
         raise ValueError("The current CT data pipeline expects one input channel.")
     if int(model_config["num_classes"]) != 2:
         raise ValueError("The starter currently supports binary background/tumor segmentation only.")
-    if len(model_config["channels"]) != len(model_config["strides"]) + 1:
-        raise ValueError("UNet channels must contain one more entry than strides.")
-    patch_size = tuple(int(v) for v in training_config["patch_size"])
-    strides = tuple(int(v) for v in model_config["strides"])
-    validate_patch_size(patch_size, strides)
+    model_name = model_config.get("name", "unet_baseline")
+    if model_name == "unet_baseline":
+        if len(model_config["channels"]) != len(model_config["strides"]) + 1:
+            raise ValueError("UNet channels must contain one more entry than strides.")
+        strides = tuple(int(v) for v in model_config["strides"])
+        validate_patch_size(tuple(int(v) for v in training_config["patch_size"]), strides)
+    elif model_name == "cbam_rsu2net":
+        if int(model_config["num_classes"]) != 2:
+            raise ValueError("CBAM-RSU2Net must use 2 output classes for the audited Task10_Colon labels.")
+        if bool(config["data"].get("use_colon_prior", False)) is False:
+            raise ValueError("The selected CBAM-RSU2Net configuration requires the external colon prior.")
+    else:
+        raise ValueError(f"Unsupported model name: {model_name}")
     if int(training_config["epochs"]) < 1:
         raise ValueError("epochs must be at least 1.")
     if int(training_config["batch_size"]) < 1:
@@ -84,8 +93,16 @@ def evaluate(
     patch_size: tuple[int, int, int],
     overlap: float,
     num_classes: int,
+    use_colon_prior: bool = False,
+    prior_margin_mm: float = 0.0,
+    spacing_mm: tuple[float, float, float] = (1.0, 1.0, 1.0),
 ) -> float:
-    """Compute mean foreground Dice using full-volume sliding-window inference."""
+    """Compute mean foreground Dice on full volumes.
+
+    When enabled, each tumor prediction is constrained by an independently
+    generated colon prior. The prior is never inferred from the unsupervised
+    third channel of the legacy notebook model.
+    """
     inferer = SlidingWindowInferer(
         roi_size=patch_size,
         sw_batch_size=1,
@@ -101,9 +118,41 @@ def evaluate(
             images = batch["image"].to(device)
             labels = batch["label"].to(device)
             logits = inferer(images, model)
-            predictions = [post_prediction(item) for item in decollate_batch(logits)]
-            targets = [post_label(item) for item in decollate_batch(labels)]
-            metric(y_pred=predictions, y=targets)
+
+            if use_colon_prior:
+                if "colon_prior" not in batch:
+                    raise RuntimeError(
+                        "Anatomical-prior evaluation requested, but batch has no 'colon_prior'. "
+                        "Generate and attach TotalSegmentator priors before evaluation."
+                    )
+                probabilities = torch.softmax(logits, dim=1)
+                prior_batch = batch["colon_prior"]
+                predictions = []
+                targets = []
+                for index in range(images.shape[0]):
+                    prediction_np, _details = apply_hierarchical_anatomical_masking(
+                        probabilities[index, 1].detach().cpu().numpy(),
+                        prior_batch[index, 0].detach().cpu().numpy(),
+                        prior_margin_mm=prior_margin_mm,
+                        spacing_mm=spacing_mm,
+                    )
+                    prediction_index = torch.as_tensor(
+                        prediction_np.astype(np.int64), device=device
+                    )
+                    target_index = labels[index, 0].long()
+                    prediction_onehot = torch.nn.functional.one_hot(
+                        prediction_index, num_classes=num_classes
+                    ).movedim(-1, 0).float()
+                    target_onehot = torch.nn.functional.one_hot(
+                        target_index, num_classes=num_classes
+                    ).movedim(-1, 0).float()
+                    predictions.append(prediction_onehot)
+                    targets.append(target_onehot)
+                metric(y_pred=predictions, y=targets)
+            else:
+                predictions = [post_prediction(item) for item in decollate_batch(logits)]
+                targets = [post_label(item) for item in decollate_batch(labels)]
+                metric(y_pred=predictions, y=targets)
 
     result = float(metric.aggregate().item())
     metric.reset()
@@ -132,6 +181,17 @@ def train(config: dict[str, Any]) -> Path:
         weight_decay=float(config["training"]["weight_decay"]),
     )
     loss_function = DiceCELoss(to_onehot_y=True, softmax=True)
+    use_amp = bool(config["training"].get("amp", False)) and device.type == "cuda"
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
+    scheduler_name = str(config["training"].get("scheduler", "none")).lower()
+    if scheduler_name == "cosine":
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=max(1, int(config["training"].get("scheduler_t_max", config["training"]["epochs"])))
+        )
+    elif scheduler_name in ("none", ""):
+        scheduler = None
+    else:
+        raise ValueError("training.scheduler must be 'cosine' or 'none'.")
     patch_size = tuple(int(v) for v in config["training"]["patch_size"])
     num_classes = int(config["model"]["num_classes"])
     epochs = int(config["training"]["epochs"])
@@ -152,18 +212,22 @@ def train(config: dict[str, Any]) -> Path:
                 images = batch["image"].to(device)
                 labels = batch["label"].to(device)
                 optimizer.zero_grad(set_to_none=True)
-                logits = model(images)
-                loss = loss_function(logits, labels)
+                with torch.autocast(device_type=device.type, enabled=use_amp):
+                    logits = model(images)
+                    loss = loss_function(logits, labels)
                 if not torch.isfinite(loss):
                     raise RuntimeError(f"Non-finite training loss at epoch {epoch}.")
-                loss.backward()
-                optimizer.step()
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
                 running_loss += float(loss.detach().cpu().item())
                 batches += 1
 
             if batches == 0:
                 raise RuntimeError("Training loader produced no batches.")
             mean_loss = running_loss / batches
+            if scheduler is not None:
+                scheduler.step()
             validation_dice = ""
 
             if epoch % validation_interval == 0 or epoch == epochs:
@@ -174,6 +238,11 @@ def train(config: dict[str, Any]) -> Path:
                     patch_size=patch_size,
                     overlap=float(config["training"]["sliding_window_overlap"]),
                     num_classes=num_classes,
+                    use_colon_prior=bool(config["data"].get("use_colon_prior", False)),
+                    prior_margin_mm=float(config["preprocessing"].get("colon_prior_margin_mm", 0.0)),
+                    spacing_mm=tuple(
+                        float(v) for v in config["preprocessing"]["target_spacing"]
+                    ),
                 )
                 if validation_dice > best_dice:
                     best_dice = validation_dice
