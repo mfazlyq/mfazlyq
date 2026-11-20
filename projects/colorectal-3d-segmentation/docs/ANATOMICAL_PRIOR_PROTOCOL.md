@@ -48,6 +48,34 @@ python scripts/audit_prior_vs_tumor_labels.py \
 
 The test should show whether dilation improves coverage, but **higher coverage alone does not prove the anatomical prior is correct**. Larger margins also make the prior less selective. Inspect the overlays, record the prior volume/occupancy, and compare masked versus unmasked tumor metrics using a fixed validation split. Select margin settings on validation data only, then report them unchanged on a held-out test set.
 
+## Author-run margin comparison on the three sample cases
+
+The author subsequently ran the updated coverage audit at physical dilation margins of 0, 5, and 10 mm. The results are:
+
+| Case | Tumor voxels | Covered at 0 mm | Coverage 0 mm | Covered at 5 mm | Coverage 5 mm | Covered at 10 mm | Coverage 10 mm |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| colon_001 | 1,783 | 1,464 | 82.1088% | 1,743 | 97.7566% | 1,783 | 100.0000% |
+| colon_005 | 15,212 | 11,046 | 72.6137% | 14,871 | 97.7583% | 15,212 | 100.0000% |
+| colon_006 | 1,194 | 1,147 | 96.0637% | 1,191 | 99.7487% | 1,191 | 99.7487% |
+
+| Margin | Macro mean across cases | Pooled tumor-voxel coverage | Minimum case coverage |
+|---|---:|---:|---:|
+| 0 mm | 83.5954% | 75.0838% | 72.6137% |
+| 5 mm | 98.4212% | 97.8888% | 97.7566% |
+| 10 mm | 99.9162% | 99.9835% | 99.7487% |
+
+At 5 mm, 384 of 18,189 annotated tumor voxels remain outside the dilated prior. At 10 mm, 3 of 18,189 remain outside. The anatomical-prior voxel counts increased as follows:
+
+| Case | Prior voxels at 0 mm | At 5 mm | At 10 mm |
+|---|---:|---:|---:|
+| colon_001 | 369,566 | 546,684 | 794,553 |
+| colon_005 | 245,180 | 427,971 | 701,302 |
+| colon_006 | 229,081 | 394,115 | 684,674 |
+
+The coverage improves substantially with dilation, but the anatomical prior also expands markedly. This makes 5 mm a **candidate validation setting**, not a final selected parameter. The 10 mm result approaches complete tumor coverage in this tiny sample but produces a considerably broader prior and may reduce anatomical selectivity. A larger prior can admit more false-positive regions and therefore cannot be selected solely by maximizing tumor coverage.
+
+**Decision at this stage:** do not hard-mask the tumor predictions yet. Visually inspect CT, tumor ground truth, original colon prior, and 5/10 mm dilated priors for the three cases, especially colon_005. Then run the same coverage and overlay QC on the full cohort, and compare raw versus post-processed tumor metrics on a fixed validation split. Select the margin using validation data only; do not tune on the held-out test set. These three cases are a pilot sample, not evidence of cohort-wide performance.
+
 ## Generate prior masks
 
 Install TotalSegmentator in the same Colab environment as the dataset:
