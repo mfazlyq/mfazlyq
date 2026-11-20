@@ -74,7 +74,7 @@ At 5 mm, 384 of 18,189 annotated tumor voxels remain outside the dilated prior. 
 
 The coverage improves substantially with dilation, but the anatomical prior also expands markedly. This makes 5 mm a **candidate validation setting**, not a final selected parameter. The 10 mm result approaches complete tumor coverage in this tiny sample but produces a considerably broader prior and may reduce anatomical selectivity. A larger prior can admit more false-positive regions and therefore cannot be selected solely by maximizing tumor coverage.
 
-**Decision at this stage:** do not hard-mask the tumor predictions yet. Visually inspect CT, tumor ground truth, original colon prior, and 5/10 mm dilated priors for the three cases, especially colon_005. Then run the same coverage and overlay QC on the full cohort, and compare raw versus post-processed tumor metrics on a fixed validation split. Select the margin using validation data only; do not tune on the held-out test set. These three cases are a pilot sample, not evidence of cohort-wide performance.
+**Sample-level prototype decision:** use a 5 mm dilated colon prior as the demonstration configuration for the three selected cases. This choice balances high sample tumor coverage (97.8888% pooled; 98.4212% macro mean) against the substantially larger prior produced at 10 mm. The 10 mm result is retained as a comparison, not selected as the prototype default. This decision is limited to the three samples and is not a claim that 5 mm is optimal across the full Task10_Colon cohort. The project will not run the additional 126-case prior inference for this portfolio demonstration.
 
 ## Generate prior masks
 
@@ -84,14 +84,16 @@ Install TotalSegmentator in the same Colab environment as the dataset:
 pip install TotalSegmentator
 ~~~
 
-Start with a small sample of CT volumes (for example, copy 3-5 files to a temporary folder) to inspect model behavior. Then generate all priors:
+For this sample-based portfolio demonstration, run the generator only on the three selected CT volumes copied to a sample directory:
 
 ~~~bash
 python scripts/generate_colon_priors.py \
-  --images-dir data/Task10_Colon/imagesTr \
-  --output-dir data/Task10_Colon/colon_priors \
+  --images-dir data/sample/imagesTr \
+  --output-dir data/sample/colon_priors \
   --device gpu
 ~~~
+
+The sample directory should contain the CT files for colon_001, colon_005, and colon_006. Full-cohort prior generation is intentionally not part of this prototype validation.
 
 The expected output for each case is:
 
@@ -152,13 +154,13 @@ python scripts/preview_prior_overlays.py \\
   --cases colon_001 colon_005 colon_006
 ~~~
 
-Red contours show the annotated tumor; cyan contours show the colon prior at the specified margin. Review the entire tumor region in all three dimensions, not only this representative axial slice. The PNGs are a screening aid and not a substitute for volumetric review.
+Red contours show the annotated tumor; cyan contours show the colon prior at the specified margin. In this pilot, the maximum-tumor axial slice was reviewed for each of the three sample cases. The 5 mm overlays visibly extend around the tumor contours in the displayed slices; the 10 mm overlays are broader, with no coverage gain over 5 mm in colon_006. This is representative-slice visual screening, not a complete 3D volumetric review.
 
 ## Train and evaluate
 
 Use configs/cbam_rsu2net_binary.yaml. The network predicts two classes; the independent prior is only used by validation/inference post-processing. The hierarchical masking implementation retains the notebook's 50%, 30%, 10% relative-maximum threshold fallback and largest-component cleanup, but intersects candidates with the external colon prior rather than the unsupervised third network channel.
 
-The strict margin is 0 mm by default. Compare 0, 5, and 10 mm margins on the validation split only, alongside unmasked binary predictions. Do not select a margin on the test set. Keep the same split and checkpoint for all ablation comparisons.
+The sample prototype configuration uses a 5 mm prior margin (see configs/cbam_rsu2net_binary.yaml). The 0/5/10 mm coverage comparison reported here is based on the three pilot cases only. End-to-end model training and raw-versus-masked prediction metrics have not yet been reproduced; do not interpret prior coverage as model Dice or tumor-segmentation accuracy.
 
 ~~~bash
 python -m colorectal_seg.train --config configs/cbam_rsu2net_binary.yaml
