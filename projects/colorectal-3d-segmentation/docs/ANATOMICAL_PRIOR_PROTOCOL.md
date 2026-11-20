@@ -111,22 +111,25 @@ First check missing, empty, or geometry-mismatched masks:
 
 ~~~bash
 python scripts/audit_colon_priors.py \
-  --images-dir data/Task10_Colon/imagesTr \
-  --priors-dir data/Task10_Colon/colon_priors
+  --images-dir data/sample/imagesTr \
+  --priors-dir data/sample/colon_priors
 ~~~
 
-Then measure how much of each ground-truth tumor mask lies inside the colon prior:
+Then measure how much of each sample ground-truth tumor mask lies inside the colon prior:
 
 ~~~bash
 python scripts/audit_prior_vs_tumor_labels.py \
-  --images-dir data/Task10_Colon/imagesTr \
-  --labels-dir data/Task10_Colon/labelsTr \
-  --priors-dir data/Task10_Colon/colon_priors
+  --images-dir data/sample/imagesTr \
+  --labels-dir data/sample/labelsTr \
+  --priors-dir data/sample/colon_priors \
+  --margins-mm 0 5 10
 ~~~
 
 This is a critical safety check for the research pipeline: a prior that excludes annotated tumor voxels can force false negatives. There is no universal acceptable coverage threshold; inspect low-coverage cases and decide the protocol before evaluating the model.
 
-## Build the prior-aware manifest
+## Optional future phase: build a prior-aware training manifest
+
+This is not required for the three-case sample validation and was not run in this pilot. It is retained as a next-step instruction for a future end-to-end training experiment on a defined train/validation split.
 
 ~~~bash
 python scripts/create_manifest.py \
@@ -156,7 +159,9 @@ python scripts/preview_prior_overlays.py \\
 
 Red contours show the annotated tumor; cyan contours show the colon prior at the specified margin. In this pilot, the maximum-tumor axial slice was reviewed for each of the three sample cases. The 5 mm overlays visibly extend around the tumor contours in the displayed slices; the 10 mm overlays are broader, with no coverage gain over 5 mm in colon_006. This is representative-slice visual screening, not a complete 3D volumetric review.
 
-## Train and evaluate
+## Optional future phase: train and evaluate the model
+
+End-to-end model training is outside the scope of this sample prior pilot and has not been reproduced. The configuration below records the 5 mm demonstration margin for a future run.
 
 Use configs/cbam_rsu2net_binary.yaml. The network predicts two classes; the independent prior is only used by validation/inference post-processing. The hierarchical masking implementation retains the notebook's 50%, 30%, 10% relative-maximum threshold fallback and largest-component cleanup, but intersects candidates with the external colon prior rather than the unsupervised third network channel.
 
