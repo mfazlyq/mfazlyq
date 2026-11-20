@@ -45,7 +45,7 @@ A Streamlit research prototype that explores AI-assisted review of campus cybers
 
 ### 🩻 3D Colorectal Tumor Segmentation — Research Starter
 
-A reproducible MONAI/PyTorch starter for NIfTI CT preprocessing, patient-level train/validation manifests, a 3D U-Net baseline, and Dice validation. This is the foundation for future CBAM-U²Net and hierarchical masking experiments.
+A reproducible PyTorch/MONAI research prototype for 3D colorectal CT segmentation. It includes a binary CBAM-RSU2Net implementation and a separate TotalSegmentator colon prior. A three-case pilot compared 0/5/10 mm prior margins; the 5 mm prototype setting achieved 98.42% macro mean tumor-label coverage in those samples. This is sample-level proof-of-concept evidence, not a full-cohort or clinical validation.
 
 **Technologies:** Python · PyTorch · MONAI · NIfTI · 3D Segmentation
 
