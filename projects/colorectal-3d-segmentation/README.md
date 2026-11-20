@@ -53,6 +53,7 @@ colorectal-3d-segmentation/
 │   ├── audit_label_values.py
 │   ├── audit_colon_priors.py
 │   ├── audit_prior_vs_tumor_labels.py
+│   ├── preview_prior_overlays.py
 │   ├── create_manifest.py
 │   └── generate_colon_priors.py
 ├── src/
@@ -139,7 +140,13 @@ python scripts/audit_colon_priors.py --images-dir data/Task10_Colon/imagesTr --p
 python scripts/audit_prior_vs_tumor_labels.py --images-dir data/Task10_Colon/imagesTr --labels-dir data/Task10_Colon/labelsTr --priors-dir data/Task10_Colon/colon_priors --margins-mm 0 5 10
 ~~~
 
-5. Inspect representative overlays and low-coverage cases. The preliminary 3-case test suggests 5 mm is a candidate to validate, not a final setting. Do not use the prior as a hard constraint until the anatomical segmentations have been visually reviewed and coverage has been measured on all cases.
+5. Inspect representative overlays and low-coverage cases:
+
+~~~bash
+python scripts/preview_prior_overlays.py --images-dir data/Task10_Colon/imagesTr --labels-dir data/Task10_Colon/labelsTr --priors-dir data/Task10_Colon/colon_priors --output-dir outputs/prior_visual_qc --cases colon_001 colon_005 colon_006
+~~~
+
+The preliminary 3-case test suggests 5 mm is a candidate to validate, not a final setting. Do not use the prior as a hard constraint until the anatomical segmentations have been visually reviewed and coverage has been measured on all cases.
 
 6. Create a reproducible manifest with all three sources:
 
