@@ -11,7 +11,7 @@ preprocessing:
     min: -200
     max: 200
   orientation: RAS
-  colon_prior_margin_mm: 0.0
+  colon_prior_margin_mm: 5.0
 
 model:
   name: cbam_rsu2net
