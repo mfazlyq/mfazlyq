@@ -51,6 +51,14 @@ A reproducible MONAI/PyTorch starter for NIfTI CT preprocessing, patient-level t
 
 ➡️ **[Explore the research project](projects/colorectal-3d-segmentation/README.md)**
 
+### 🌐 Personal Portfolio Website
+
+A responsive portfolio website built with HTML, CSS, and vanilla JavaScript. It presents my background, technical expertise, selected AI projects, and current research direction.
+
+**Run locally:** Open `portfolio-site/index.html` with VS Code Live Server, or follow the [local setup guide](portfolio-site/README.md).
+
+➡️ **[Explore the portfolio website source](portfolio-site/)**
+
 ## Research and technical interests
 
 | Area | Topics |
