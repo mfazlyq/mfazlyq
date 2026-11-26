@@ -1,7 +1,0 @@
-# Install a CUDA-compatible PyTorch build separately when needed:
-# https://pytorch.org/get-started/locally/
-torch>=2.5
-monai==1.6.1
-nibabel>=5.3
-numpy>=1.26
-PyYAML>=6.0
