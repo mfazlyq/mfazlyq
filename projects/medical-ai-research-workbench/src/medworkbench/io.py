@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import tempfile
-from typing import BinaryIO
 
 import nibabel as nib
 import numpy as np
@@ -54,6 +53,12 @@ def load_nifti_bytes(file_bytes: bytes, filename: str) -> NiftiVolume:
         if len(canonical.shape) != 3:
             raise ValueError(
                 f"Only 3D scalar NIfTI volumes are supported; received shape {canonical.shape}."
+            )
+        voxel_count = int(np.prod(canonical.shape, dtype=np.int64))
+        if voxel_count > 60_000_000:
+            raise ValueError(
+                f"Volume has {voxel_count:,} voxels; the current local prototype limit is "
+                "60 million voxels per file to reduce memory exhaustion risk."
             )
 
         data = np.asarray(canonical.dataobj, dtype=np.float32)
