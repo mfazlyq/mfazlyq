@@ -38,7 +38,15 @@ cd mfazlyq
 code .
 ```
 
-### 2. Create a virtual environment
+### 2. Open the project folder
+
+From the repository root, run:
+
+```powershell
+cd projects/medical-ai-research-workbench
+```
+
+### 3. Create a virtual environment
 
 ```powershell
 py -m venv .venv
@@ -52,15 +60,15 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Install the workbench
+### 4. Install the workbench
 
 ```bash
 python -m pip install --upgrade pip
-pip install -r projects/medical-ai-research-workbench/requirements.txt
-pip install -e projects/medical-ai-research-workbench
+pip install -r requirements.txt
+pip install -e .
 ```
 
-### 4. Generate synthetic demo volumes
+### 5. Generate synthetic demo volumes
 
 From the repository root:
 
@@ -68,12 +76,12 @@ From the repository root:
 python projects/medical-ai-research-workbench/scripts/create_demo_data.py
 ```
 
-The script writes four synthetic NIfTI files to `projects/medical-ai-research-workbench/demo_data/`. They are generated locally and are not committed to Git.
+The script writes four synthetic NIfTI files to `demo_data/`. They are generated locally and are not committed to Git.
 
-### 5. Start Streamlit
+### 6. Start Streamlit
 
 ```bash
-streamlit run projects/medical-ai-research-workbench/app.py
+streamlit run app.py
 ```
 
 Streamlit prints the local URL (normally `http://localhost:8501`). Upload the four generated files from `demo_data/` to explore the interface.
