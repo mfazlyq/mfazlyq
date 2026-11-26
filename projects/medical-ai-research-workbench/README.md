@@ -136,7 +136,7 @@ NiBabel uses NIfTI affine metadata to map voxel coordinates into world coordinat
 ## Tests
 
 ```bash
-PYTHONPATH=projects/medical-ai-research-workbench/src python -m unittest discover -s projects/medical-ai-research-workbench/tests -v
+PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
 ## Roadmap
