@@ -51,6 +51,14 @@ A reproducible MONAI/PyTorch starter for NIfTI CT preprocessing, patient-level t
 
 ➡️ **[Explore the research project](projects/colorectal-3d-segmentation/README.md)**
 
+### 🧬 Medical AI Research Workbench
+
+A local-first Streamlit application for inspecting 3D NIfTI CT volumes, reviewing Ground Truth / Colon Prior / AI Prediction overlays, checking spatial geometry, and calculating binary segmentation metrics.
+
+**Technologies:** Python · Streamlit · NiBabel · NumPy · Plotly
+
+➡️ **[Explore Medical AI Research Workbench](projects/medical-ai-research-workbench/README.md)**
+
 ## Research and technical interests
 
 | Area | Topics |
