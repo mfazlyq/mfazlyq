@@ -200,7 +200,7 @@ overview = st.columns(4)
 overview[0].metric("Volume shape", " × ".join(str(v) for v in ct_volume.shape))
 overview[1].metric("Voxel spacing", " × ".join(f"{v:.2f}" for v in ct_volume.spacing_mm) + " mm")
 overview[2].metric("Orientation", ct_volume.orientation)
-overview[3].metric("Intensity range", f"{ct_min:.0f} to {ct_max:.0f}")
+overview[3].metric("Display window · P1–P99", f"{ct_min:.0f} to {ct_max:.0f}")
 st.caption(
     f"Loaded: {ct_volume.name} · Closest canonical orientation · "
     "Display intensity is clipped to the 1st–99th percentile for visualization only."
