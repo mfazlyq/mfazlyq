@@ -13,7 +13,7 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from medworkbench.io import NiftiVolume, load_nifti_bytes, validate_same_geometry
+from medworkbench.io import NiftiVolume, binarize_volume, load_nifti_bytes, validate_same_geometry
 from medworkbench.metrics import compute_binary_metrics, compute_prior_coverage
 from medworkbench.visualization import PLANE_AXES, make_slice_figure
 
@@ -214,7 +214,10 @@ st.caption(
 
 overlay_arrays: dict[str, np.ndarray] = {}
 for label, volume in valid_volumes.items():
-    overlay_arrays[label] = volume.data
+    overlay_arrays[label] = binarize_volume(
+        volume.data,
+        probability_threshold=probability_threshold,
+    )
 
 cols = st.columns(3, gap="medium")
 plane_order = ["Axial", "Coronal", "Sagittal"]
