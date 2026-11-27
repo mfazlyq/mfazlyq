@@ -2,106 +2,115 @@
   <img src="assets/profile-header.svg" alt="M. Fazly Qusyairy — AI Research and Software Engineering" width="100%">
 </p>
 
+<h1 align="center">M. Fazly Qusyairy</h1>
 <p align="center">
-  <a href="https://github.com/mfazlyq"><img src="https://img.shields.io/badge/GitHub-mfazlyq-181717?style=for-the-badge&logo=github" alt="GitHub"></a>
-  <a href="https://github.com/mfazlyq?tab=repositories"><img src="https://img.shields.io/badge/Explore-Projects-0A66C2?style=for-the-badge&logo=github" alt="Explore projects"></a>
-  <img src="https://img.shields.io/badge/Focus-Applied%20AI-0891B2?style=for-the-badge" alt="Applied AI">
-  <img src="https://img.shields.io/badge/Focus-Research-7C3AED?style=for-the-badge" alt="Research">
+  <strong>AI Research · Deep Learning · Medical Image Analysis · Software Engineering</strong>
 </p>
-
-<h1 align="center">Hello, I'm M. Fazly Qusyairy 👋</h1>
 <p align="center">
-  <strong>Computer Science · Applied AI · Deep Learning · Software Engineering</strong>
+  <a href="https://github.com/mfazlyq?tab=repositories"><img src="https://img.shields.io/badge/Explore-My%20Projects-0B84A5?style=for-the-badge&logo=github&logoColor=white" alt="Explore projects"></a>
+  <img src="https://img.shields.io/badge/Focus-Applied%20AI-0891B2?style=for-the-badge" alt="Applied AI">
+  <img src="https://img.shields.io/badge/Focus-Research-475569?style=for-the-badge" alt="Research">
 </p>
 
 ---
 
-## About me
+## Profile
 
-I am a computer science professional with an academic background in Informatics Engineering and a Master of Computer Science from **Universitas Esa Unggul**. I am interested in turning research ideas into practical, well-documented software and intelligent systems.
+I am a computer science professional with a background in **Informatics Engineering (B.Sc.)** and a **Master of Computer Science** from **Universitas Esa Unggul**. My interests sit at the intersection of applied artificial intelligence, deep learning research, and practical software development.
 
-My work and learning interests connect **artificial intelligence, computer vision, medical image analysis, information systems, and cybersecurity governance**. I value reproducible experiments, evidence-based evaluation, responsible AI, and clear technical documentation.
+I enjoy translating technical ideas into documented, testable prototypes—from 3D medical-image analysis to AI-assisted cybersecurity review and information systems for higher education.
 
-- 🎓 **Academic background:** Informatics Engineering (S1) and Master of Computer Science (S2).
-- 🧠 **AI interests:** Deep learning, computer vision, neural-network attention mechanisms, and 3D image segmentation.
-- 🩻 **Research focus:** AI-assisted analysis of medical images, including colorectal CT segmentation.
-- 🛡️ **Applied AI:** Cybersecurity governance and AI-assisted assessment using NIST CSF 2.0.
-- 🧩 **Engineering:** Python applications, data workflows, and information-system development.
+**My working principles:** reproducible experiments, evidence-based evaluation, responsible AI, and software that is understandable and maintainable.
 
-## Featured project
+## Areas of focus
 
-### 🛡️ NIST AI Audit Assistant
-
-A Streamlit research prototype that explores AI-assisted review of campus cybersecurity policies and procedures against the NIST Cybersecurity Framework (CSF).
-
-| Details | Description |
+| Domain | Focus |
 |---|---|
-| Problem space | Cybersecurity governance and policy-gap review |
-| Core technologies | Python, Streamlit, LangChain, Chroma, Hugging Face Embeddings, Groq |
-| Key workflow | PDF extraction → semantic retrieval → LLM-assisted findings → review and reporting |
-| Project status | Research prototype; generated findings require human verification |
+| **Medical AI & Computer Vision** | 3D CT image segmentation, NIfTI data, medical-image visualization |
+| **Deep Learning Research** | CBAM attention, U²-Net / RSU blocks, hierarchical anatomical masking |
+| **Applied AI & Cybersecurity** | NIST CSF 2.0, semantic retrieval, AI-assisted policy-gap review |
+| **Software & Information Systems** | Python applications, research workbenches, higher-education quality processes |
 
-➡️ **[Explore NIST AI Audit Assistant](https://github.com/mfazlyq/audit-nist-ai)**
+## Selected projects
 
-### 🩻 3D Colorectal Tumor Segmentation
+### 01 · 3D Colorectal Tumor Segmentation
+**Research prototype · Medical AI · Deep Learning**
 
-A research prototype using binary CBAM-RSU2Net and an independent external colon anatomical prior, with sample-level validation and reproducibility documentation.
+A research codebase exploring binary **CBAM-RSU2Net** segmentation with a separate external colon anatomical prior for 3D colorectal CT volumes.
 
-**Technologies:** Python · PyTorch · MONAI · NIfTI · CBAM-RSU2Net
+- Implements a binary tumor/background model direction based on an audit of the supplied label masks.
+- Documents sample-level anatomical-prior quality checks and tumor-coverage analysis.
+- Includes research protocols, scripts, configuration, and unit tests.
 
-➡️ **[Explore the standalone research repository](https://github.com/mfazlyq/colorectal-3d-segmentation)**
+**Research status:** the documented prior-quality pilot covers three selected cases. Full-cohort prior evaluation and end-to-end model training/validation are not yet claimed as completed.
 
-### 🧬 Medical AI Research Workbench
+**Stack:** Python · PyTorch · MONAI · NiBabel · NIfTI
 
-A local-first Streamlit application for inspecting 3D NIfTI CT volumes, viewing Ground Truth / Colon Prior / AI Prediction overlays, checking spatial geometry, and calculating segmentation metrics.
+➡️ [View the research repository](https://github.com/mfazlyq/colorectal-3d-segmentation)
 
-**Technologies:** Python · Streamlit · NiBabel · NumPy · Plotly
+### 02 · Medical AI Research Workbench
+**Research software · 3D Medical Imaging · Data Visualization**
 
-➡️ **[Explore the standalone application repository](https://github.com/mfazlyq/medical-ai-research-workbench)**
+A local-first application for inspecting 3D NIfTI CT volumes, reviewing Ground Truth / Colon Prior / AI Prediction overlays, checking spatial geometry, and calculating binary segmentation metrics.
 
-## Research and technical interests
+- Axial, coronal, and sagittal visualization.
+- Overlay review and NIfTI geometry checks.
+- Dice, IoU, precision, recall, accuracy, and prior-coverage calculations.
+- Synthetic demo data for local exploration.
 
-| Area | Topics |
-|---|---|
-| Medical AI | 3D CT image segmentation, colorectal cancer imaging |
-| Deep Learning | CBAM attention, U²-Net / RSU blocks, hierarchical masking |
-| Cybersecurity | NIST CSF 2.0, governance, control-gap analysis |
-| Software Engineering | Python, application prototyping, data and document workflows |
-| Information Systems | Digital systems, process improvement, and technology-enabled operations |
+**Current scope:** a viewer and evaluation workbench; model training and CBAM-RSU2Net inference are outside the current release.
 
-## Technology toolbox
+**Stack:** Python · Streamlit · NiBabel · NumPy · Plotly
+
+➡️ [View the application repository](https://github.com/mfazlyq/medical-ai-research-workbench)
+
+### 03 · NIST AI Audit Assistant
+**Applied AI · Cybersecurity Governance · Decision Support**
+
+A Streamlit research prototype for exploring AI-assisted review of institutional cybersecurity policies and procedures against the **NIST Cybersecurity Framework (CSF)**.
+
+- PDF extraction, semantic chunking, embedding, and retrieval.
+- LLM-assisted drafting of potential gap findings.
+- Structured findings, visual summaries, and report exports.
+- Unit tests and GitHub Actions workflow.
+
+**Responsible-use note:** generated findings are preliminary decision support. Evidence, control mapping, and recommendations require review by a qualified human auditor; this is not a compliance certification tool.
+
+**Stack:** Python · Streamlit · LangChain · Chroma · Hugging Face Embeddings · Groq
+
+➡️ [View the project repository](https://github.com/mfazlyq/audit-nist-ai)
+
+## Technical toolbox
 
 <p>
   <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch">
   <img src="https://img.shields.io/badge/MONAI-0054A6?style=flat-square&logoColor=white" alt="MONAI">
   <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" alt="Streamlit">
+  <img src="https://img.shields.io/badge/NiBabel-64748B?style=flat-square&logoColor=white" alt="NiBabel">
+  <img src="https://img.shields.io/badge/NumPy-013243?style=flat-square&logo=numpy&logoColor=white" alt="NumPy">
+  <img src="https://img.shields.io/badge/Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" alt="Plotly">
   <img src="https://img.shields.io/badge/LangChain-1C3C3C?style=flat-square&logoColor=white" alt="LangChain">
   <img src="https://img.shields.io/badge/Chroma-5B3CC4?style=flat-square&logoColor=white" alt="Chroma">
   <img src="https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white" alt="Git">
   <img src="https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black" alt="Linux">
 </p>
 
-## What I value
+## Academic background
 
-- **Research with traceable evidence** — methods, assumptions, and results should be explainable.
-- **Responsible AI** — model outputs need validation, especially in healthcare and cybersecurity contexts.
-- **Useful engineering** — projects should be understandable, maintainable, and documented.
-- **Continuous learning** — improve solutions through experimentation, feedback, and iteration.
+**Universitas Esa Unggul**
+- Master of Computer Science
+- Bachelor of Informatics Engineering
 
-## Explore my work
+**Research interests:** medical image analysis, deep learning, computer vision, responsible AI, cybersecurity governance, and information systems in higher education.
 
-<p align="center">
-  <a href="https://github.com/mfazlyq?tab=repositories">
-    <img src="https://img.shields.io/badge/All%20Repositories-181717?style=for-the-badge&logo=github" alt="All repositories">
-  </a>
-  <a href="https://github.com/mfazlyq/audit-nist-ai">
-    <img src="https://img.shields.io/badge/Featured%20Project-NIST%20AI%20Audit-0A66C2?style=for-the-badge" alt="Featured project">
-  </a>
-</p>
+## Connect & explore
+
+- [GitHub profile](https://github.com/mfazlyq)
+- [All public repositories](https://github.com/mfazlyq?tab=repositories)
 
 ---
 
 <p align="center">
-  <sub>Building at the intersection of intelligent systems, research, and practical software.</sub>
+  <sub>Research with evidence. Engineering with purpose. AI applied responsibly.</sub>
 </p>
