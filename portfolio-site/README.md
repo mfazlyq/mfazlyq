@@ -1,25 +1,22 @@
-# M. Fazly Qusyairy — Personal Portfolio
+# Academic & Research Portfolio Website
 
-A responsive personal portfolio website built with **HTML, CSS, and vanilla JavaScript**.
+A responsive personal portfolio website for M. Fazly Qusyairy, focused on Artificial Intelligence, Deep Learning Research, Biomedical Image Analysis, and Education Technology.
 
-## Run locally in VS Code
+## Run locally
 
-No Node.js packages, build step, or framework installation is required.
+No build tools or package installation are required.
 
 ### Option 1 — VS Code Live Server
 
-1. Clone the repository and checkout the portfolio branch:
-
+1. Clone the repository:
    ```bash
    git clone --branch feature/portfolio-website https://github.com/mfazlyq/mfazlyq.git
    ```
-
-2. Open the repository folder in VS Code.
+2. Open the repository in VS Code.
 3. Open `portfolio-site/index.html`.
-4. Install the **Live Server** extension if it is not already installed.
-5. Right-click `index.html` and select **Open with Live Server**.
+4. Run it with the Live Server extension.
 
-### Option 2 — Python local server
+### Option 2 — Python
 
 From the repository root:
 
@@ -28,38 +25,32 @@ cd portfolio-site
 python -m http.server 5500
 ```
 
-Open [http://localhost:5500](http://localhost:5500) in your browser.
+Open http://localhost:5500.
 
-On Windows, `py -m http.server 5500` can be used when the `python` command is unavailable.
+## Contents
 
-## Project files
+- Academic and research profile.
+- Education and areas of interest.
+- Selected projects with links to their standalone repositories.
+- Current deep learning research direction.
+- Teaching interests and education technology focus.
 
-```text
-portfolio-site/
-├── index.html     # Semantic page content and sections
-├── styles.css     # Responsive visual system and layout
-├── script.js      # Mobile navigation, reveal effects, project filters
-├── favicon.svg    # FQ monogram
-└── README.md      # Local setup instructions
+## Technology
+
+Semantic HTML · CSS · Vanilla JavaScript
+
+## Validation
+
+Run the static integrity checks:
+
+```bash
+python portfolio-site/validate.py
+node --check portfolio-site/script.js
 ```
 
-## Features
+## Content notes
 
-- Responsive layout for desktop, tablet, and mobile.
-- Dark navy visual theme with cyan/blue accents.
-- About, education, expertise, selected projects, research, and contact sections.
-- Project category filters.
-- Mobile navigation.
-- Scroll reveal effects with reduced-motion support.
-- No runtime dependencies or build toolchain.
-
-## Content and validation notes
-
-- The 3D colorectal segmentation project is described as a research prototype.
-- The reported 98.42% macro figure refers to tumor-label coverage by the anatomical prior in three selected samples. It is not model Dice, clinical validation, or full-cohort performance.
-- The NIST AI Audit Assistant is described as a prototype whose generated findings require human verification.
-- Update project details and external profile links as new work is completed.
-
-## Customize
-
-Edit the content in `index.html` and visual tokens at the top of `styles.css`. Project cards can be added by copying an existing `article.project-card` and setting its `data-category` attribute.
+- The colorectal segmentation page distinguishes three-case anatomical-prior coverage from model performance. It does not claim end-to-end model validation.
+- The Medical AI Research Workbench is described as a viewer and evaluation application; it does not claim model training or CBAM-RSU2Net inference.
+- The NIST AI Audit Assistant is a research prototype. Its findings require human verification.
+- The portfolio does not publish patient data, credentials, or unverified contact details.
