@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#07111f"/>
-  <rect x="1" y="1" width="62" height="62" rx="13" fill="none" stroke="#56e2e6" stroke-opacity=".8"/>
-  <path d="M16 17h18c9 0 14 5 14 13S43 43 34 43h-8v7h-10V17Zm10 9v8h8c3 0 5-1 5-4s-2-4-5-4h-8Z" fill="#edf5ff"/>
-  <circle cx="49" cy="48" r="5" fill="#56e2e6"/>
+  <rect width="64" height="64" rx="12" fill="#f7f8f4"/>
+  <rect x="1" y="1" width="62" height="62" rx="11" fill="none" stroke="#718b62" stroke-width="2"/>
+  <text x="32" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#233247">FQ</text>
 </svg>
