@@ -1,0 +1,39 @@
+name: Portfolio site checks
+
+on:
+  push:
+    branches: [main, "feature/**"]
+    paths:
+      - "portfolio-site/**"
+      - ".github/workflows/portfolio-site.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "portfolio-site/**"
+      - ".github/workflows/portfolio-site.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate HTML references and structure
+        run: python portfolio-site/validate.py
+
+      - name: Check JavaScript syntax
+        run: node --check portfolio-site/script.js

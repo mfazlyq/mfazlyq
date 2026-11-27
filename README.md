@@ -104,6 +104,14 @@ A Streamlit research prototype for exploring AI-assisted review of institutional
 
 **Research interests:** medical image analysis, deep learning, computer vision, responsible AI, cybersecurity governance, and information systems in higher education.
 
+
+
+## Portfolio website
+
+A responsive academic and research portfolio presenting my focus in artificial intelligence, deep learning research, biomedical image analysis, education technology, and selected projects.
+
+➡️ [Explore the portfolio website](portfolio-site/README.md)
+
 ## Connect & explore
 
 - [GitHub profile](https://github.com/mfazlyq)
